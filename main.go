@@ -27,3 +27,29 @@ func main() {
 	fmt.Printf("%x", h.Sum(nil))
 
 }
+
+/*
+
+POSTGRES DB SCHEMA
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS passwords (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    website VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+Database schema ^
+
+
+*/
