@@ -2,9 +2,13 @@ package main
 
 import (
 	"crypto/sha256"
+	"database/sql"
 	"fmt"
+	"log"
 	"syscall"
+	"time"
 
+	_ "github.com/lib/pq"
 	"golang.org/x/term"
 )
 
@@ -12,15 +16,37 @@ import (
 TODOS
 - Program flow
 - Add storage for passwords
+- Connect to DB
 
 */
 
 func main() {
+
+	db, err := sql.Open("postgres", "postgres://aaron:pleasechangeme!@localhost/gopass?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("INSERT INTO users (username, password_hash, created_at) VALUES ($1, $2, $3)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
 	fmt.Println("Please enter your password, it will not show up when typing")
 	var userString string
 	bytePass, _ := term.ReadPassword(int(syscall.Stdin))
+	username := "Plato"
+	passwordHash := string(bytePass)
+	createdAt := time.Now()
 
-	userString = string(bytePass)
+	//write to DB
+
+	_, err = stmt.Exec(username, passwordHash, createdAt)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	h := sha256.New()
 	h.Write([]byte(userString))
