@@ -10,7 +10,8 @@ import (
 
 /*
 TODOS
-
+- Program flow
+- Add storage for passwords
 
 */
 
