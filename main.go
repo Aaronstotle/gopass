@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"syscall"
@@ -35,10 +36,14 @@ func main() {
 	defer stmt.Close()
 
 	fmt.Println("Please enter your password, it will not show up when typing")
+
 	var userString string
 	bytePass, _ := term.ReadPassword(int(syscall.Stdin))
 	username := "Plato"
-	passwordHash := string(bytePass)
+	userString = string(bytePass)
+	h := sha256.New()
+	h.Write([]byte(userString)) // this line actually hashes the password
+	passwordHash := hex.EncodeToString(h.Sum(nil))
 	createdAt := time.Now()
 
 	//write to DB
@@ -48,8 +53,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h := sha256.New()
-	h.Write([]byte(userString))
 	fmt.Printf("%x", h.Sum(nil))
 
 }
