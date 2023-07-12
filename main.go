@@ -6,19 +6,16 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"syscall"
-	"time"
 
 	_ "github.com/lib/pq"
 	"golang.org/x/term"
 )
 
 /*
-TODOS
-- Program flow
-- Add storage for passwords
-- Connect to DB
-
+STATUS: Postgres can receive queries, need to ask for username. Users should be able to have multiple entries in the password table.
+TODO: put DB writes in a function
 */
 
 func main() {
@@ -35,50 +32,52 @@ func main() {
 	}
 	defer stmt.Close()
 
-	fmt.Println("Please enter your password, it will not show up when typing")
+	greeting()
+	hashPass()
 
-	var userString string
-	bytePass, _ := term.ReadPassword(int(syscall.Stdin))
-	username := "Plato"
-	userString = string(bytePass)
-	h := sha256.New()
-	h.Write([]byte(userString)) // this line actually hashes the password
-	passwordHash := hex.EncodeToString(h.Sum(nil))
-	createdAt := time.Now()
+	exit()
 
-	//write to DB
+	// var userString string
+	// bytePass, _ := term.ReadPassword(int(syscall.Stdin))
 
-	_, err = stmt.Exec(username, passwordHash, createdAt)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// userString = string(bytePass)
+	// h := sha256.New()
+	// h.Write([]byte(userString)) // this line actually hashes the password
+	// passwordHash := hex.EncodeToString(h.Sum(nil))
+	// fmt.Println(passwordHash)
+	// createdAt := time.Now()
 
-	fmt.Printf("%x", h.Sum(nil))
+	// _, err = stmt.Exec(username, passwordHash, createdAt)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// fmt.Printf("%x", h.Sum(nil))
 
 }
 
-/*
+func greeting() {
+	var username string
+	fmt.Println("Please enter your username")
+	fmt.Scanf("%s", &username)
 
-POSTGRES DB SCHEMA
+	fmt.Println("Please enter your password, it will not show up when typing")
 
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+}
 
-CREATE TABLE IF NOT EXISTS passwords (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    website VARCHAR(255) NOT NULL,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+func hashPass() string {
+	bytePass, _ := term.ReadPassword(int(syscall.Stdin))
+	pass := string(bytePass)
 
-Database schema ^
+	h := sha256.New()
+	h.Write([]byte(pass))
+	passwordHash := hex.EncodeToString(h.Sum(nil))
+	fmt.Printf("Your hashed password is, %x", h.Sum(nil))
+	return passwordHash
+}
 
-
-*/
+func exit() int {
+	fmt.Println("\nExiting program, thanks for playing!")
+	os.Exit(0)
+	return 0
+}
